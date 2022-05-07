@@ -65,13 +65,13 @@ void ReadNR(T &x ,S tryy, TT mn, TTT mx)
 }
 void SetSize()
 {
-    string unu100="Valoarea trebuie sa fie numar 1-99, incercati din nou: ";
+    string unu100="Valoarea trebuie sa fie numar 1-69, incercati din nou: ";
     string zero1="Valoarea trebuie sa fie 1(da) sau 0, incercati din nou: ";
     cout<<"Introduceti inaltimea tablei ";
-    ReadNR(n,unu100,1,99);
+    ReadNR(n,unu100,1,69);
     CClear();
     cout<<"Introduceti latimea tablei ";
-    ReadNR(m,unu100,1,99);
+    ReadNR(m,unu100,1,69);
     CClear();
     cout<<"Vreti grafica simpla, dar 100% functionala(0 sau 1)? ";
     ReadNR(safe,zero1,0,1);
@@ -131,11 +131,15 @@ bool cinci(int x,int y,int nr)
     dfs(x,y,100,nr,5);
     return pp;
 }
-void movee(int col,int nr)
+int LowestEmptyLine(int col)
 {
     int lin;
     for(lin=1;lin<=n && !board[lin][col];lin++);
-    lin--;
+    return lin-1;
+}
+void movee(int col,int nr)
+{
+    int lin=LowestEmptyLine(col);
     board[lin][col]=nr+6;
     if(cinci(lin,col,nr+6))
     {
@@ -147,15 +151,32 @@ void movee(int col,int nr)
             scor2+=c;
     }
 }
+int Ai_score(int x,int y)
+{
+    if(board[x][y]==8)
+        return 50;
+    if(board[x][y]==7)
+        return 25;
+}
 void AI_move()
 {
-    int rnd=rand()%m+1;
-    if(legal(rnd))
+    int jbest,best=jbest=0;
+    for(int j=1;j<=m;j++)
     {
-        movee(rnd,2);
-        return;
+        int score=rand()%100+1;
+        int lin=LowestEmptyLine(j);
+        if(!lin)
+            continue;
+        score+=Ai_score(lin+1,j);
+        score+=Ai_score(lin,j+1);
+        score+=Ai_score(lin,j-1);
+        if(score>best)
+        {
+            best=score;
+            jbest=j;
+        }
     }
-    AI_move();
+    movee(jbest,2);
 }
 void Play()
 {
