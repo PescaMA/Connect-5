@@ -1,9 +1,11 @@
 #include <iostream>
 #include <string.h>;
+#include <chrono>
+#include <thread>
 using namespace std;
 short board[105][105];
 short n,m,safe;
-#pragma region
+int scor1,scor2;
 void SetBoard()
 {
     for(int i=1;i<=n;i++)
@@ -28,22 +30,22 @@ void ShowBoard()
     CClear();
     char ch[69];
     if(safe)
-        strcpy(ch," |=++++XO#");
+        strcpy(ch," |=++++XO#&");
     else
     {   /// it only works when converting to char (like here)
-        int v[]={32,186,205,201,200,187,188,5,232,177};
-        /// is  [spc]║   ═   ╔   ╚    ╗   ╝ ♣  Φ   ▒
-        for(int i=0;i<10;i++)
+        int v[]={32,186,205,201,200,187,188,5,232,177,216};
+        /// is  [spc]║   ═   ╔   ╚    ╗   ╝ ♣  Φ   ▒   ╪
+        for(int i=0;i<11;i++)
             ch[i]=v[i];
-        ch[10]='\0';
+        ch[11]='\0';
     }
-
     for(int i=0;i<=n+1;i++)
     {
         for(int j=0;j<=m+1;j++)
             cout<<ch[ board[i][j] ];
         cout<<'\n';
     }
+    cout<<"Scorul este: "<<scor1<<"(tu) vs "<<scor2<<'\n';
 }
 template <class T,class S,class TT,class TTT>
 void ReadNR(T &x ,S tryy, TT mn, TTT mx)
@@ -75,12 +77,10 @@ void SetSize()
     ReadNR(safe,zero1,0,1);
     SetBoard();
 }
-#pragma endregion
-int scor1,scor2;
 int const scormx=50;
 bool finished()
 {
-    if(scor1>scormx || scor2>scormx)
+    if(scor1>=scormx || scor2>=scormx)
         return true;
     for(int j=1;j<=m;j++)
         if(!board[1][j])
@@ -89,6 +89,7 @@ bool finished()
 }
 void ending()
 {
+    ShowBoard();
     cout<<"Scorul tau este "<<scor1;
     cout<<"\nScorul AI-ului este: "<<scor2<<'\n';
     if(scor1>scor2)
@@ -97,6 +98,11 @@ void ending()
         cout<<"Ai-ul a castigat!";
     else
         cout<<"Egalitate!";
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    string isend;
+    cin>>isend;
+    while(strcmp(isend.c_str(),"end"))
+        cout<<"Write \"end\" to end program: ",cin>>isend;
 }
 bool legal(int col)
 {
@@ -108,6 +114,8 @@ void dfs(int x,int y,int nr,int nr2,int cmx)
     if(board[x][y]!=nr || c==cmx)
         return;
     c++;
+    if(c>5)
+        c+=2;
     board[x][y]=nr2;
     dfs(x+1,y,nr,nr2,cmx);dfs(x,y+1,nr,nr2,cmx);
     dfs(x-1,y,nr,nr2,cmx);dfs(x,y-1,nr,nr2,cmx);
@@ -119,6 +127,7 @@ bool cinci(int x,int y,int nr)
     dfs(x,y,nr,100,5);
     if(c==5)
         pp=true;
+    c=-1;
     dfs(x,y,100,nr,5);
     return pp;
 }
@@ -131,7 +140,7 @@ void movee(int col,int nr)
     if(cinci(lin,col,nr+6))
     {
         c=0;
-        dfs(lin,col,nr+6,1,10000);
+        dfs(lin,col,nr+6,nr+8,10000);
         if(nr==1)
             scor1+=c;
         else
@@ -176,7 +185,7 @@ void Play()
 }
 int main()
 {
+    srand(time(NULL));
     SetSize();
     Play();
-
 }
